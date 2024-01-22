@@ -38,21 +38,21 @@ contract Giveaway is Ownable, RrpRequesterV0 {
 
     }
 
-// participate: Function allowing an address to participate in a specific giveaway.
-// @param id: The unique identifier of the giveaway in which the participant wants to join.
-// @dev This function first checks that the participant is not the owner of the giveaway,
-//      as the owner is restricted from participating in their own giveaway.
-// @dev If the participant is the owner, the function reverts with an error message.
-// @dev If the participant is not the owner, the function appends their address (msg.sender)
-//      to the list of participants for the specified giveaway identified by the given 'id'.
-// @param id: The unique identifier of the giveaway in which the participant wants to join.
-function participate() public {
-    // Check that the participant is not the owner of the giveaway.
-    require(owner() != msg.sender, "owner of giveaway cannot participate");
+    // participate: Function allowing an address to participate in a specific giveaway.
+    // @param id: The unique identifier of the giveaway in which the participant wants to join.
+    // @dev This function first checks that the participant is not the owner of the giveaway,
+    //      as the owner is restricted from participating in their own giveaway.
+    // @dev If the participant is the owner, the function reverts with an error message.
+    // @dev If the participant is not the owner, the function appends their address (msg.sender)
+    //      to the list of participants for the specified giveaway identified by the given 'id'.
+    // @param id: The unique identifier of the giveaway in which the participant wants to join.
+    function participate() public {
+        // Check that the participant is not the owner of the giveaway.
+        require(owner() != msg.sender, "owner of giveaway cannot participate");
 
-    // If the participant is not the owner, push their address (msg.sender) to the list of participants for the giveaway.
-    participants.push(msg.sender);
-}
+        // If the participant is not the owner, push their address (msg.sender) to the list of participants for the giveaway.
+        participants.push(msg.sender);
+    }
 
     /// @notice Sets parameters used in requesting QRNG services
     /// @dev No access control is implemented here for convenience. This is not
@@ -105,6 +105,7 @@ function participate() public {
         // Do what you want with `qrngUint256Array` here...
         emit ReceivedUint256Array(requestId, qrngUint256Array);
     }
+    
 // function reward(uint256 id) public {
 //     require(giveaways[id].owner == msg.sender, "Only the owner can reward the giveaway");
 //     // get random numbers
