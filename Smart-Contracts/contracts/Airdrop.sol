@@ -6,6 +6,9 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Airdrop is Ownable, RrpRequesterV0 {
+    using Counters for Counters.Counter; // OpenZeppelin Counter
+    Counters.Counter private _airdropCount; // Counter for airdrops created
+
     // Event emitted when a uint256 value is requested
     event RequestedUint256(bytes32 indexed requestId);
     // Event emitted when a uint256 response is received
@@ -15,22 +18,33 @@ contract Airdrop is Ownable, RrpRequesterV0 {
     // Event emitted when request parameters are set
     event SetRequestParameters(address airnode, bytes32 endpointIdUint256, address sponsorWallet);
 
-    // Address of the creator of the airdrop
-    address public creater;
-    // Mapping to track claimed status for each address
-    mapping(address => bool) public claimed;
-
     // Airnode related variables
     address public airnode;
     bytes32 public endpointIdUint256;
     address public sponsorWallet;
 
-    // Airdrop details
-    address public tokenAddress;
-    uint256 public airdropAmount;
+    // Airdrop struct
+    struct airdrop {
+        address creator;
+        address tokenAddress;
+        uint256 airdropAmount;
+        uint256 airdropBalance;
+    }
+
+    // Keeps track of who made a request and for what airdrop it's meant
+    struct Request {
+        uint256 id;
+        address requester;
+    }
+
+    // Keeps tracks of airdrops with their ids
+    mapping(uint256 => airdrop) public airdrops;
 
     // Mapping to track the sender of each request
-    mapping(bytes32 => address) requestSender;
+    mapping(bytes32 => Request) requests;
+
+    // Mapping to track claimed status for each address in an airdrop
+    mapping(address => mapping (uint256 => bool)) public claimed;
 
     // Mapping to track requests expected to be fulfilled
     mapping(bytes32 => bool) public expectingRequestWithIdToBeFulfilled;
@@ -43,15 +57,19 @@ contract Airdrop is Ownable, RrpRequesterV0 {
     /// @param _tokenAddress Address of the ERC-20 token to be used for the airdrop
     /// @param _airdropAmount Amount of tokens to be used for the airdrop
     function createAirdrop(address _tokenAddress, uint256 _airdropAmount) external {
-        creater = msg.sender;
+        _airdropCount.increment();
+        uint256 id = _airdropCount.current();
+
+        airdrops[id].creator = msg.sender;
+        airdrops[id].tokenAddress = _tokenAddress;
+        airdrops[id].airdropAmount = _airdropAmount;
+        airdrops[id].airdropBalance = _airdropAmount;
+
         // Create an instance of the IERC20 interface for the specified reward token.
         IERC20 rewardToken = IERC20(_tokenAddress);
 
         // Transfer the specified reward amount from the sender to the contract.
         rewardToken.transferFrom(msg.sender, address(this), _airdropAmount);
-
-        tokenAddress = _tokenAddress;
-        airdropAmount = _airdropAmount;
     }
 
     /// @notice Set request parameters for the airdrop
@@ -70,8 +88,9 @@ contract Airdrop is Ownable, RrpRequesterV0 {
     }
 
     /// @notice Participants claim the airdrop using Airnode requests
-    function claimAirdrop() external {
-        require(claimed[msg.sender] != true, "You can only claim once");
+    /// @param airdropId ID of the airdrop participants are claiming from
+    function claimAirdrop(uint256 airdropId) external {
+        require(claimed[msg.sender][airdropId] != true, "You can only claim once");
         // Create a request to the Airnode to obtain a uint256 value
         bytes32 requestId = airnodeRrp.makeFullRequest(
             airnode,
@@ -85,9 +104,11 @@ contract Airdrop is Ownable, RrpRequesterV0 {
         // Mark the request as expected to be fulfilled
         expectingRequestWithIdToBeFulfilled[requestId] = true;
         // Record the sender of the request
-        requestSender[requestId] = msg.sender;
+        requests[requestId].requester = msg.sender;
+        requests[requestId].id = airdropId;
+        
         // Mark the participant as claimed
-        claimed[msg.sender] = true;
+        claimed[msg.sender][airdropId] = true;
         // Emit an event to log the request
         emit RequestedUint256(requestId);
     }
@@ -105,39 +126,42 @@ contract Airdrop is Ownable, RrpRequesterV0 {
             "Request ID not known"
         );
         expectingRequestWithIdToBeFulfilled[requestId] = false;
-                // Decode the response to obtain the random number
+        // Decode the response to obtain the random number
         uint256 randomNumber = abi.decode(data, (uint256));
         // Release the airdrop to the participant
-        releaseAirdrop(requestSender[requestId], randomNumber);
+        releaseAirdrop(requests[requestId].id, requests[requestId].requester, randomNumber);
         // Emit an event to log the received value
         emit ReceivedUint256(requestId, randomNumber);
     }
 
     /// @notice Release the airdrop to a participant based on a random number
+    /// @param id ID of the airdrop
     /// @param claimer Address of the participant claiming the airdrop
     /// @param randomNumner Random number generated by the Airnode
-    function releaseAirdrop(address claimer, uint256 randomNumner) internal {
+    function releaseAirdrop(uint256 id, address claimer, uint256 randomNumner) internal {
         // Trim the number to be between 1 and 100 to represent 0.1% and 10%
         uint256 claimPercentage = (randomNumner % 100) + 1;
         // Calculate the amount
-        uint256 claimAmount = (airdropAmount / 1000) * claimPercentage;
+        uint256 claimAmount = (airdrops[id].airdropAmount / 1000) * claimPercentage;
 
-        IERC20 rewardToken = IERC20(tokenAddress);
+        IERC20 rewardToken = IERC20(airdrops[id].tokenAddress);
 
         // Get the balance of the contract
-        uint256 contractBalance = rewardToken.balanceOf(address(this));
+        uint256 airdropBalance = airdrops[id].airdropBalance;
 
         // If the claim amount is more than half of the contract balance,
         // transfer half of the balance to the claimer
-        if ((claimAmount * 2) >= contractBalance) {
-            uint256 _claimAmount = (contractBalance / 1000) * claimPercentage;
+       
+        if ((claimAmount * 2) >= airdropBalance) {
+            uint256 _claimAmount = (airdropBalance / 1000) * claimPercentage;
             rewardToken.transfer(claimer, _claimAmount);
-            emit AirdropReleased(tokenAddress, claimer, _claimAmount);
+            airdrops[id].airdropBalance -= _claimAmount;
+            emit AirdropReleased(airdrops[id].tokenAddress, claimer, _claimAmount);
         } else {
             // Otherwise, transfer the calculated claim amount to the claimer
             rewardToken.transfer(claimer, claimAmount);
-            emit AirdropReleased(tokenAddress, claimer, claimAmount);
+            airdrops[id].airdropBalance -= claimAmount;
+            emit AirdropReleased(airdrops[id].tokenAddress, claimer, claimAmount);
         }
     }
 }
-
