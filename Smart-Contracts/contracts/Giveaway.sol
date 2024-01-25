@@ -6,93 +6,108 @@ import "@openzeppelin/contracts/utils/Counters.sol";
 import "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 
 contract Giveaway is Ownable, RrpRequesterV0 {
-    event RequestedUint256Array(bytes32 indexed requestId, uint256 size);
-    event ReceivedUint256Array(bytes32 indexed requestId, uint256[] response);
+    using Counters for Counters.Counter; // OpenZeppelin Counter
+    Counters.Counter private _giveawayCount; // Counter for giveaways created
 
+    // Event emitted when a uint256 value is requested
+    event RequestedUint256(bytes32 indexed requestId);
+    // Event emitted when a uint256 response is received
+    event ReceivedUint256(bytes32 indexed requestId, uint256 response);
+    // Event emitted when an giveaway is released to a user
+    event GiveawayReleased(address user, uint256 amount);
+    // Event emitted when request parameters are set
+    event SetRequestParameters(address airnode, bytes32 endpointIdUint256, address sponsorWallet);
+
+    // Airnode related variables
     address public airnode;
-    bytes32 public endpointIdUint256Array;
+    bytes32 public endpointIdUint256;
     address public sponsorWallet;
 
-    address public rewardAddress;
-    uint256 public limit;
-    uint256 public rewardAmount;
+    // Giveaway struct
+    struct giveaway {
+        address creator;
+        uint256 giveawayAmount;
+        uint256 giveawayBalance;
+    }
 
-    address[] public participants;
-    // the selected ids
-    uint256[] internal giveawayIds;
-    // keeps tracks of the ids
-    uint256 internal giveawayindex;
+    // Keeps track of who made a request and for what giveaway it's meant
+    struct Request {
+        uint256 id;
+        address requester;
+    }
 
+    // Keeps tracks of giveaways with their ids
+    mapping(uint256 => giveaway) public giveaways;
+
+    // Mapping to track the sender of each request
+    mapping(bytes32 => Request) requests;
+
+    // Mapping to track claimed status for each address in an giveaway
+    mapping(address => mapping (uint256 => bool)) public claimed;
+
+    // Mapping to track requests expected to be fulfilled
     mapping(bytes32 => bool) public expectingRequestWithIdToBeFulfilled;
 
-    constructor(address _airnodeRrp, address _owner, address _rewardAddress, uint256 _limit, uint256 _rewardAmount) RrpRequesterV0(_airnodeRrp) Ownable(_owner) {
-        // Create an instance of the IERC20 interface for the specified reward token.
-        IERC20 rewardToken = IERC20(_rewardAddress);
-
-        // Transfer the specified reward amount from the sender to the contract.
-        rewardToken.transferFrom(msg.sender, address(this), _rewardAmount);
-
-        rewardAddress = _rewardAddress;
-        limit = _limit;
-        rewardAmount = _rewardAmount;
-
+    // Constructor initializes the contract with Airnode RRP and owner addresses
+    constructor(address _airnodeRrp, address _owner) RrpRequesterV0(_airnodeRrp) Ownable(_owner) {
     }
 
-    // participate: Function allowing an address to participate in a specific giveaway.
-    // @param id: The unique identifier of the giveaway in which the participant wants to join.
-    // @dev This function first checks that the participant is not the owner of the giveaway,
-    //      as the owner is restricted from participating in their own giveaway.
-    // @dev If the participant is the owner, the function reverts with an error message.
-    // @dev If the participant is not the owner, the function appends their address (msg.sender)
-    //      to the list of participants for the specified giveaway identified by the given 'id'.
-    // @param id: The unique identifier of the giveaway in which the participant wants to join.
-    function participate() public {
-        // Check that the participant is not the owner of the giveaway.
-        require(owner() != msg.sender, "owner of giveaway cannot participate");
+    /// @notice Create an giveaway by transferring native coins to the contract
+    function creategiveaway() external payable {
+        _giveawayCount.increment();
+        uint256 id = _giveawayCount.current();
 
-        // If the participant is not the owner, push their address (msg.sender) to the list of participants for the giveaway.
-        participants.push(msg.sender);
+        giveaways[id].creator = msg.sender;
+        giveaways[id].giveawayAmount = msg.value;
+        giveaways[id].giveawayBalance = msg.value;
     }
 
-    /// @notice Sets parameters used in requesting QRNG services
-    /// @dev No access control is implemented here for convenience. This is not
-    /// secure because it allows the contract to be pointed to an arbitrary
-    /// Airnode. Normally, this function should only be callable by the "owner"
-    /// or not exist in the first place.
-    /// @param _airnode Airnode address
-    /// @param _endpointIdUint256Array Endpoint ID used to request a `uint256[]`
-    /// @param _sponsorWallet Sponsor wallet address
+    /// @notice Set request parameters for the giveaway
+    /// @param _airnode Address of the Airnode contract
+    /// @param _endpointIdUint256 Endpoint ID for the uint256 value request
+    /// @param _sponsorWallet Address of the sponsor's wallet
     function setRequestParameters(
         address _airnode,
-        bytes32 _endpointIdUint256Array,
+        bytes32 _endpointIdUint256,
         address _sponsorWallet
-    ) external {
+    ) external onlyOwner {
         airnode = _airnode;
-        endpointIdUint256Array = _endpointIdUint256Array;
+        endpointIdUint256 = _endpointIdUint256;
         sponsorWallet = _sponsorWallet;
+        emit SetRequestParameters(airnode, endpointIdUint256, sponsorWallet);
     }
 
-    /// @notice Requests a `uint256[]`
-    function rewardGiveaway() external {
+    /// @notice Participants claim the giveaway using Airnode requests
+    /// @param giveawayId ID of the giveaway participants are claiming from
+    function claimGiveaway(uint256 giveawayId) external {
+        require(claimed[msg.sender][giveawayId] != true, "You can only claim once");
+        // Create a request to the Airnode to obtain a uint256 value
         bytes32 requestId = airnodeRrp.makeFullRequest(
             airnode,
-            endpointIdUint256Array,
+            endpointIdUint256,
             address(this),
             sponsorWallet,
             address(this),
-            this.fulfilRewards.selector,
-            // Using Airnode ABI to encode the parameters
-            abi.encode(bytes32("1u"), bytes32("size"), limit)
+            this.fulfilClaim.selector,
+            ""
         );
+        // Mark the request as expected to be fulfilled
         expectingRequestWithIdToBeFulfilled[requestId] = true;
-        emit RequestedUint256Array(requestId, limit);
+        // Record the sender of the request
+        requests[requestId].requester = msg.sender;
+        requests[requestId].id = giveawayId;
+        
+        // Mark the participant as claimed
+        claimed[msg.sender][giveawayId] = true;
+        // Emit an event to log the request
+        emit RequestedUint256(requestId);
     }
 
     /// @notice Called by the Airnode through the AirnodeRrp contract to
     /// fulfill the request
     /// @param requestId Request ID
     /// @param data ABI-encoded response
-    function fulfilRewards(bytes32 requestId, bytes calldata data)
+    function fulfilClaim(bytes32 requestId, bytes calldata data)
         external
         onlyAirnodeRrp
     {
@@ -101,22 +116,40 @@ contract Giveaway is Ownable, RrpRequesterV0 {
             "Request ID not known"
         );
         expectingRequestWithIdToBeFulfilled[requestId] = false;
-        uint256[] memory qrngUint256Array = abi.decode(data, (uint256[]));
-        // Do what you want with `qrngUint256Array` here...
-        emit ReceivedUint256Array(requestId, qrngUint256Array);
+        // Decode the response to obtain the random number
+        uint256 randomNumber = abi.decode(data, (uint256));
+        // Release the giveaway to the participant
+        releaseGiveaway(requests[requestId].id, requests[requestId].requester, randomNumber);
+        // Emit an event to log the received value
+        emit ReceivedUint256(requestId, randomNumber);
     }
-    
-// function reward(uint256 id) public {
-//     require(giveaways[id].owner == msg.sender, "Only the owner can reward the giveaway");
-//     // get random numbers
-//     // calculaate the amount to send
 
-//     // send the amount to participants
+    /// @notice Release the giveaway to a participant based on a random number
+    /// @param id ID of the giveaway
+    /// @param claimer Address of the participant claiming the giveaway
+    /// @param randomNumner Random number generated by the Airnode
+    function releaseGiveaway(uint256 id, address claimer, uint256 randomNumner) internal {
+        // Trim the number to be between 1 and 100 to represent 0.1% and 10%
+        uint256 claimPercentage = (randomNumner % 100) + 1;
+        // Calculate the amount
+        uint256 claimAmount = (giveaways[id].giveawayAmount / 1000) * claimPercentage;
 
-// }
+        // Get the balance of the contract
+        uint256 giveawayBalance = giveaways[id].giveawayBalance;
 
-// function getRandom(uint256 id) public returns() {
-    
-// }
-
+        // If the claim amount is more than half of the contract balance,
+        // transfer half of the balance to the claimer
+       
+        if ((claimAmount * 2) >= giveawayBalance) {
+            uint256 _claimAmount = (giveawayBalance / 1000) * claimPercentage;
+            payable(claimer).transfer(_claimAmount);
+            giveaways[id].giveawayBalance -= _claimAmount;
+            emit GiveawayReleased(claimer, _claimAmount);
+        } else {
+            // Otherwise, transfer the calculated claim amount to the claimer
+            giveaways[id].giveawayBalance -= claimAmount;
+            payable(claimer).transfer(claimAmount);
+            emit GiveawayReleased(claimer, claimAmount);
+        }
+    }
 }
