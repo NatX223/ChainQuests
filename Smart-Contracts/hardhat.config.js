@@ -1,4 +1,5 @@
 require("@nomicfoundation/hardhat-toolbox");
+require('dotenv').config();
 
 /** @type import('hardhat/config').HardhatUserConfig */
 module.exports = {
@@ -13,4 +14,12 @@ module.exports = {
       },
     ],
   },
+  networks: {
+    hardhat: {
+    },
+    Pegasus: {
+      url: "https://replicator.pegasus.lightlink.io/rpc/v1",
+      accounts: [process.env.PRIVATE_KEY]
+    }
+  }
 };
