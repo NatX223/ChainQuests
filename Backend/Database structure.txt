@@ -1,0 +1,21 @@
+giveaways
+    title
+    description
+    giveawayAmount
+    remainingAmount
+    imageUrl
+    startDate
+    stopDate
+    additionalInfo
+    creator
+
+airdrops
+    title
+    description
+    giveawayAmount
+    remainingAmount
+    imageUrl
+    startDate
+    stopDate
+    tokenAddress
+    creator
