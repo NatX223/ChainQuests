@@ -3,19 +3,19 @@ giveaways
     description
     giveawayAmount
     remainingAmount
-    imageUrl
+    image
     startDate
-    stopDate
+    endDate
     additionalInfo
     creator
 
 airdrops
     title
     description
-    giveawayAmount
+    airdropAmount
     remainingAmount
-    imageUrl
+    image
     startDate
-    stopDate
+    endDate
     tokenAddress
     creator

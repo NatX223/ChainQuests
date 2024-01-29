@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import { MEDAL_SCHEMA, DEPLOYMENT_CHAINS } from "@/assets/data";
 import { ImageUpload, MedalForm, SelectField } from "@/components";
-import { createMedal } from "@/utils/app.mjs";
+// import {  } from "@/utils/app.mjs";
 import "./index.scss";
 
 export const Medal = ({ group }: { group: string }) => {

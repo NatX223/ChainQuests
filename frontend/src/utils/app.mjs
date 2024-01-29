@@ -1,32 +1,49 @@
 import { ethers } from "ethers";
 var provider;
 var signer;
-var userProfile;
 
-const baseAPIURL = "https://wagmi-backend.up.railway.app/";
+const baseAPIURL = "https://localhost:3300/";
 
-const badgeContractAddress = "0x9Fc3168ee0Cf90aaBF485BF24c337da9922bB4a3";
-const badgeABI = [
-	{
-		inputs: [
-			{
-				internalType: "address",
-				name: "owner",
-				type: "address",
-			},
-		],
-		name: "mint",
-		outputs: [],
-		stateMutability: "nonpayable",
-		type: "function",
-	},
-];
-
-const medalContractAddress = "0xe18A8E1072e932841573d5716b69F9121BE8E69C";
-const medalABI = [
+const giveawayContractAddress = "0x9Fc3168ee0Cf90aaBF485BF24c337da9922bB4a3";
+const giveawayABI = [
     {
 		"inputs": [],
-		"name": "createMedal",
+		"name": "creategiveaway",
+		"outputs": [],
+		"stateMutability": "payable",
+		"type": "function"
+	},
+	{
+		"inputs": [
+		  {
+			"internalType": "uint256",
+			"name": "giveawayId",
+			"type": "uint256"
+		  }
+		],
+		"name": "claimGiveaway",
+		"outputs": [],
+		"stateMutability": "nonpayable",
+		"type": "function"
+	}
+];
+
+const airdropContractAddress = "0xe18A8E1072e932841573d5716b69F9121BE8E69C";
+const airdropABI = [
+    {
+		"inputs": [
+		  {
+			"internalType": "address",
+			"name": "_tokenAddress",
+			"type": "address"
+		  },
+		  {
+			"internalType": "uint256",
+			"name": "_airdropAmount",
+			"type": "uint256"
+		  }
+		],
+		"name": "createAirdrop",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
@@ -34,22 +51,42 @@ const medalABI = [
 	  {
 		"inputs": [
 		  {
-			"internalType": "address[]",
-			"name": "receivers",
-			"type": "address[]"
-		  },
-		  {
 			"internalType": "uint256",
-			"name": "id",
+			"name": "airdropId",
 			"type": "uint256"
 		  }
 		],
-		"name": "batchMint",
+		"name": "claimAirdrop",
 		"outputs": [],
 		"stateMutability": "nonpayable",
 		"type": "function"
-	  },
+	  }
 ];
+
+const tokenABI = [{
+	"inputs": [
+	  {
+		"internalType": "address",
+		"name": "spender",
+		"type": "address"
+	  },
+	  {
+		"internalType": "uint256",
+		"name": "value",
+		"type": "uint256"
+	  }
+	],
+	"name": "approve",
+	"outputs": [
+	  {
+		"internalType": "bool",
+		"name": "",
+		"type": "bool"
+	  }
+	],
+	"stateMutability": "nonpayable",
+	"type": "function"
+}]
 
 export const connectWallet = async () => {
 	try {
@@ -72,76 +109,6 @@ export const getUserAddress = async () => {
 	const address = await signer.getAddress();
 	console.log(address);
 	return address;
-};
-
-export const logIn = async () => {
-	await connectWallet();
-	const address = await getUserAddress();
-	try {
-		const response = await fetch(`${baseAPIURL}checkUser/${address}`);
-
-		if (!response.ok) {
-			throw new Error("Network response was not ok");
-		}
-
-		const res = await response.json();
-		const exists = res.exists;
-
-		if (exists == true) {
-			console.log("true");
-			return true;
-		} else {
-			await getProfile();
-			console.log("false");
-			return false;
-		}
-	} catch (error) {
-		console.log(error);
-		console.log("not working");
-	}
-};
-
-// sign up
-export const signUp = async (profileRequestBody, address) => {
-	try {
-		profileRequestBody["address"] = address;
-		// call create function to API with details
-		const endPoint = "createProfile";
-		const createProfileEndpoint = baseAPIURL + endPoint;
-		const response = await fetch(createProfileEndpoint, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(profileRequestBody),
-		});
-		// return API endpoint with userName
-		// pass it into the universal profile deploy and deploy UP
-		if (!response.ok) {
-			throw new Error("Network error");
-		}
-
-		console.log("created");
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-// function to sign up
-export const signIn = async() => {
-	await connectWallet();
-	const userAddress = await getUserAddress();
-
-	const response = await fetch(
-		`${baseAPIURL}/getUserProfileAddress/${userAddress}`,
-	);
-
-	if (!response.ok) {
-		throw new Error("Network response was not ok");
-	}
-
-	const data = await response.json();
-	return data;
 };
 
 // upload image
@@ -173,73 +140,8 @@ export const uploadImage = async (image) => {
 	}
 };
 
-// mint badge
-export const mintBadge = async (mintBody) => {
-	try {
-		await connectWallet();
-		const minter = await getUserAddress();
-
-		const image = mintBody.image;
-		const url = await uploadImage(image);
-		mintBody.image = url;
-
-		mintBody.minter = minter;
-
-		// call mint function to API with details
-		const endPoint = "mintBadge";
-
-		const mintBadgeEndpoint = baseAPIURL + endPoint;
-
-		const response = await fetch(mintBadgeEndpoint, {
-			method: "POST",
-			headers: {
-				"Content-Type": "application/json",
-			},
-			body: JSON.stringify(mintBody),
-		});
-
-		if (!response.ok) {
-			throw new Error("Server Error");
-		}
-
-		const data = await response.json();
-
-		console.log("Minted Successfully", data.response);
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-function getNumber(inputString) {
-	const numberRegex = /\d+(\.\d+)?/; // Regular expression to match numbers
-	const match = inputString.match(numberRegex); // Search for the number in the input string
-
-	if (match) {
-		return parseFloat(match[0]); // Parse the matched number and return it as a float
-	} else {
-		return null; // Return null if no number is found in the string
-	}
-}
-
-function getType(input) {
-	switch (input) {
-		case "Top Nft collector":
-			return 0;
-		case "Donator":
-			return 1;
-		case "Liquidity provider":
-			return 2;
-		case "Trading expert":
-			return 3;
-		case "Bug hunter":
-			return 4;
-		default:
-			return 0; // Return -1 if the input doesn't match any specified type
-	}
-}
-
-// create medal
-export const createMedal = async (createBody) => {
+// create giveaway
+export const createGiveaway = async (createBody) => {
 	try {
 		await connectWallet();
 		const creator = await getUserAddress();
@@ -247,26 +149,23 @@ export const createMedal = async (createBody) => {
 		const image = createBody.image;
 		const url = await uploadImage(image);
 
+		const giveawayAmount = Number(createBody.amount);
+
 		const body = { image: url };
-		body.additionalInfo = createBody.additionalInfo;
-		body.contractAddress = createBody.address;
-		body.chain = createBody.deployChain;
-		body.creator = creator;
-		body.index = 0;
-		body.type = getType(createBody.type);
-		body.alphaType = createBody.type;
 		body.title = createBody.title;
-		body.validator = createBody.validator;
-		body.minters = [];
+		body.description = createBody.description;
+		body.giveawayAmount = giveawayAmount;
+		body.remainingAmount = giveawayAmount;
+		body.additionalInfo = createBody.additionalInfo;
+		body.creator = creator;
+		body.startDate = createBody.startDate;
+		body.endDate = createBody.endDate;
+		
+		const endPoint = "createGiveaway";
 
-		body.requirement = getNumber(createBody.metrics);
+		const createGiveawayEndpoint = baseAPIURL + endPoint;
 
-		// call mint function to API with details
-		const endPoint = "createMedal";
-
-		const createMedalEndpoint = baseAPIURL + endPoint;
-
-		const response = await fetch(createMedalEndpoint, {
+		const response = await fetch(createGiveawayEndpoint, {
 			method: "POST",
 			headers: {
 				"Content-Type": "application/json",
@@ -281,16 +180,84 @@ export const createMedal = async (createBody) => {
 		const data = await response.json();
 
 		const contract = new ethers.Contract(
-			medalContractAddress,
-			medalABI,
+			giveawayContractAddress,
+			giveawayABI,
 			signer,
 		);
 
-		const TX = await contract.createMedal();
+		const _giveawayAmount = ethers.parseEther(giveawayAmount);
+
+		const TX = await contract.createGiveaway({ value: _giveawayAmount });
 		const receipt = await TX.wait();
 		console.log("created", receipt);
 
-		console.log("Minted Successfully", data.response, receipt);
+		console.log("created Successfully", data.response, receipt);
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+export const createAirdrop = async (createBody) => {
+	try {
+		await connectWallet();
+		const creator = await getUserAddress();
+
+		const image = createBody.image;
+		const url = await uploadImage(image);
+
+		const airdropAmount = Number(createBody.amount);
+
+		const body = { image: url };
+		body.title = createBody.title;
+		body.description = createBody.description;
+		body.airdropAmount = airdropAmount;
+		body.remainingAmount = airdropAmount;
+		body.additionalInfo = createBody.additionalInfo;
+		body.creator = creator;
+		body.startDate = createBody.startDate;
+		body.endDate = createBody.endDate;
+        body.tokenAddress = createBody.tokenAddress;
+		
+		const endPoint = "createAirdrop";
+
+		const createAirdropEndpoint = baseAPIURL + endPoint;
+
+		const response = await fetch(createAirdropEndpoint, {
+			method: "POST",
+			headers: {
+				"Content-Type": "application/json",
+			},
+			body: JSON.stringify(body),
+		});
+
+		if (!response.ok) {
+			throw new Error("Server Error");
+		}
+
+		const data = await response.json();
+
+		const contract = new ethers.Contract(
+			airdropContractAddress,
+			airdropABI,
+			signer,
+		);
+
+        const tokenContract = new ethers.Contract(
+            createBody.tokenAddress,
+            tokenABI,
+            signer
+        )
+
+		const _airdropAmount = ethers.parseEther(airdropAmount);
+
+        const approveTX = await tokenContract.approve(airdropContractAddress, _airdropAmount);
+        const approveReceipt = await approveTX.wait();
+		console.log("created", approveReceipt);
+		const TX = await contract.createAirdrop(createBody.tokenAddress, _airdropAmount);
+		const receipt = await TX.wait();
+		console.log("created", receipt);
+
+		console.log("created Successfully", data.response, receipt);
 	} catch (error) {
 		console.log(error);
 	}
@@ -336,76 +303,6 @@ export const medalAction = async (id, claimed, isCreator, isParticipant) => {
 	
 		}
 
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-export const getProfile = async () => {
-	await connectWallet();
-	const address = await getUserAddress();
-
-	try {
-		const endPoint = `getUserProfileAddress/${address}`;
-
-		const getProfileEndpoint = baseAPIURL + endPoint;
-
-		const response = await fetch(getProfileEndpoint, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error("Server Error");
-		}
-
-		const data = await response.json();
-		console.log(data);
-		return data;
-	} catch (error) {
-		console.log(error);
-	}
-};
-
-export const returnProfile = () => {
-	return { userProfile };
-};
-
-export const mintEligible = async (tokenId) => {
-	try {
-		const endPoint = `getEligibleArray/${tokenId}`;
-
-		const getEligible = baseAPIURL + endPoint;
-
-		const response = await fetch(getEligible, {
-			method: "GET",
-			headers: {
-				"Content-Type": "application/json",
-			},
-		});
-
-		if (!response.ok) {
-			throw new Error("Server Error");
-		}
-
-		const data = await response.json();
-		const eligible = data.eligible;
-		if (eligible.length < 1) {
-			console.log(eligible);
-		} else {
-			// mint to eligible
-			const contract = new ethers.Contract(
-				medalContractAddress,
-				medalABI,
-				signer,
-			);
-			const TX = await contract.batchMint(eligible, tokenId);
-			const receipt = await TX.wait();
-			console.log("created", receipt);
-		}
-		console.log(data);
 	} catch (error) {
 		console.log(error);
 	}
