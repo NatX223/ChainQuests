@@ -131,7 +131,7 @@ app.post("/createAirdrop", async (req, res) => {
     }
 })
 
-app.get("/getAllGiveaways:address", async (req, res) => {  
+app.get("/getAllGiveaways/:address", async (req, res) => {  
     
     const address = req.params.address;
 
@@ -140,7 +140,7 @@ app.get("/getAllGiveaways:address", async (req, res) => {
       const allgiveaways = await giveaways.get();
       const giveawayArray = [];
       const giveawaysCount = allgiveaways.size;
-  
+
       for (let i = 0; i < giveawaysCount; i++) {
         const giveaway = await giveaways.doc(`${i}`).get();
         const title = giveaway.data().title;
@@ -178,7 +178,7 @@ app.get("/getAllGiveaways:address", async (req, res) => {
           claimed = questerSnapshot.docs[0].data().claimed;
         }
 
-        const _isCreator = await isCreator(`${i}`, address);
+        const _isCreator = await isGiveawayCreator(`${i}`, address);
         
         value.claimed = claimed;
         value.isCreator = _isCreator;
@@ -188,7 +188,6 @@ app.get("/getAllGiveaways:address", async (req, res) => {
   
         giveawayArray.push(giveawayDetails);
       }
-  
       res.status(200);
       res.json(giveawayArray);
     
@@ -200,7 +199,7 @@ app.get("/getAllGiveaways:address", async (req, res) => {
   
 })
 
-app.get("/getAllAirdrops:address", async (req, res) => {  
+app.get("/getAllAirdrops/:address", async (req, res) => {  
     
     const address = req.params.address;
     
@@ -249,7 +248,7 @@ app.get("/getAllAirdrops:address", async (req, res) => {
           claimed = questerSnapshot.docs[0].data().claimed;
         }
 
-        const _isCreator = await isCreator(`${i}`, address);
+        const _isCreator = await isAirdropCreator(`${i}`, address);
         
         value.claimed = claimed;
         value.isCreator = _isCreator;
@@ -271,7 +270,7 @@ app.get("/getAllAirdrops:address", async (req, res) => {
   
 })
 
-app.get("/claimGiveaway:giveawayId", async (req, res) => {
+app.put("/claimGiveaway/:giveawayId", async (req, res) => {
     try {
         const giveawayId = req.params.giveawayId;
         const address = req.body.address;
@@ -301,7 +300,7 @@ app.get("/claimGiveaway:giveawayId", async (req, res) => {
 
 })
 
-app.get("/claimAirdrop:airdropId", async (req, res) => {
+app.put("/claimAirdrop/:airdropId", async (req, res) => {
     try {
         const airdropId = req.params.airdropId;
         const address = req.body.address;
@@ -331,7 +330,7 @@ app.get("/claimAirdrop:airdropId", async (req, res) => {
 
 })
 
-const isCreator = async(id, address) => {
+const isGiveawayCreator = async(id, address) => {
     try {
       const giveawayRef = db.collection('giveaways').doc(`${id}`);
       const giveawayDoc = await giveawayRef.get();
@@ -339,7 +338,29 @@ const isCreator = async(id, address) => {
         return false;
       }
       const creator = giveawayDoc.data().creator;
+
+      if (creator == address) {
+        return true;
+      }
   
+      else {
+        return false;
+      }
+  
+    } catch (error) {
+      console.log(error);
+    }
+}
+
+const isAirdropCreator = async(id, address) => {
+    try {
+      const airdropRef = db.collection('airdrops').doc(`${id}`);
+      const airdropDoc = await airdropRef.get();
+      if (!airdropDoc.exists) {
+        return false;
+      }
+      const creator = airdropDoc.data().creator;
+
       if (creator == address) {
         return true;
       }
