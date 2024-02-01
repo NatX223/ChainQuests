@@ -1,4 +1,4 @@
-import { MedalDetails } from "@/app/explore/[id]/page";
+import { GiveawayDetails } from "@/app/explore/[id]/page";
 import { ORGANIZATION_MEDALS } from "@/assets/data";
 import { Badge } from "@/components";
 import { useFetch } from "@/hooks/useFetch";
@@ -26,13 +26,15 @@ export const RenderOrgMedals = function ({ group }: { group: string }) {
 		</div>
 	);
 };
-export const OnChain = ({ group }: { group: string }) => {
-	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
+
+export const Giveaways = ({ group }: { group: string }) => {
+	// const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
+	const baseApiUrl = "http://localhost:3300/";
 	const { address, isConnected } = useWeb3ModalAccount();
-	const API = `${baseApiUrl}getAllMedals/${address}`;
+	const API = `${baseApiUrl}getAllGiveaways/${address}`;
 
 	const { data, loading, error } = useFetch({ url: API });
-	const MEDALS = data as string[];
+	const GIVEAWAYS = data as string[];
 
 	return loading ? (
 		<p>Loading...</p>
@@ -42,7 +44,7 @@ export const OnChain = ({ group }: { group: string }) => {
 		<section className={`${group}`}>
 			<div className={`${group}__wrapper`}>
 				<div className={`${group}__medals`}>
-					{MEDALS.map((item: any, index: number) => {
+					{GIVEAWAYS.map((item: any, index: number) => {
 						const { id, value } = item;
 
 						return (
@@ -50,7 +52,45 @@ export const OnChain = ({ group }: { group: string }) => {
 								key={index | id}
 								className={`${group}__medal-detail`}
 							>
-								<MedalDetails
+								<GiveawayDetails
+									group={`${group}__medal-detail`}
+									{...value}
+								/>
+							</div>
+						);
+					})}
+				</div>
+			</div>
+		</section>
+	);
+};
+
+export const Airdrops = ({ group }: { group: string }) => {
+	// const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
+	const baseApiUrl = "http://localhost:3300/";
+	const { address, isConnected } = useWeb3ModalAccount();
+	const API = `${baseApiUrl}getAllAirdrops/${address}`;
+
+	const { data, loading, error } = useFetch({ url: API });
+	const AIRDROPS = data as string[];
+
+	return loading ? (
+		<p>Loading...</p>
+	) : error ? (
+		<p>Error loading Medals. please check your internet connection</p>
+	) : (
+		<section className={`${group}`}>
+			<div className={`${group}__wrapper`}>
+				<div className={`${group}__medals`}>
+					{AIRDROPS.map((item: any, index: number) => {
+						const { id, value } = item;
+
+						return (
+							<div
+								key={index | id}
+								className={`${group}__medal-detail`}
+							>
+								<GiveawayDetails
 									group={`${group}__medal-detail`}
 									{...value}
 								/>

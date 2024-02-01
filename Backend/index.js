@@ -32,7 +32,7 @@ app.use(cors({
     origin: '*', // Allow requests from any origin
     credentials: true, // Include if you're using credentials (e.g., cookies, authorization headers)
 }));
-  
+
 app.use(express.json());
 
 const startServer = async () => {
@@ -140,12 +140,13 @@ app.get("/getAllGiveaways/:address", async (req, res) => {
       const allgiveaways = await giveaways.get();
       const giveawayArray = [];
       const giveawaysCount = allgiveaways.size;
+      const count = giveawaysCount + 1;
 
-      for (let i = 0; i < giveawaysCount; i++) {
+      for (let i = 1; i < count; i++) {
         const giveaway = await giveaways.doc(`${i}`).get();
         const title = giveaway.data().title;
         const description = giveaway.data().description;
-        const imageUrl = giveaway.data().imageUrl;
+        const imageUrl = giveaway.data().image;
         const giveawayAmount = giveaway.data().giveawayAmount;
         const remainingAmount = giveaway.data().remainingAmount;
         const id = i;
@@ -156,7 +157,6 @@ app.get("/getAllGiveaways/:address", async (req, res) => {
         value.id = id;
         value.title = title;
         value.host = creator;
-        // value.hostImage = static image
         value.giveawayImage = imageUrl;
         value.description = description;
 
@@ -208,8 +208,9 @@ app.get("/getAllAirdrops/:address", async (req, res) => {
       const allairdrops = await airdrops.get();
       const airdropArray = [];
       const airdropsCount = allairdrops.size;
-  
-      for (let i = 0; i < airdropsCount; i++) {
+      const count = airdropsCount + 1;
+
+      for (let i = 1; i < count; i++) {
         const airdrop = await airdrops.doc(`${i}`).get();
         const title = airdrop.data().title;
         const description = airdrop.data().description;
@@ -339,6 +340,7 @@ const isGiveawayCreator = async(id, address) => {
       }
       const creator = giveawayDoc.data().creator;
 
+      console.log(creator, address);
       if (creator == address) {
         return true;
       }

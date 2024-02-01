@@ -14,8 +14,7 @@ export const BADGE_SCHEMA = yup.object().shape({
 	description: yup.string().required("Giveaway description is required"),
 
 	amount: yup.number()
-	.required("Amount to giveaway is required")
-	.min(1, "Minimum amount to giveaway is 1 ETH"),
+	.required("Amount to giveaway is required"),
 
 
 	// Validation for working status field

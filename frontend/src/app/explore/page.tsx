@@ -4,8 +4,8 @@ import { ReactNode } from "react";
 import { useBodyOverflow, useScrollReset, useTabSwitcher } from "@/hooks";
 import {
 	ExploreTabs,
-	MarketPlace as Board,
-	OnChain as Medals,
+	Giveaways,
+	Airdrops
 } from "@/components";
 import "./page.scss";
 
@@ -31,8 +31,8 @@ const Explore = () => {
 
 	// Object mapping tab names to corresponding components
 	const tabComponents: TabComponents = {
-		board: <Board group="marketplace" />,
-		medals: <Medals group="onchain" />,
+		board: <Giveaways group="onchain" />,
+		medals: <Airdrops group="onchain" />,
 	};
 
 	/**

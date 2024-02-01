@@ -2,9 +2,9 @@ import { ethers } from "ethers";
 var provider;
 var signer;
 
-const baseAPIURL = "https://localhost:3300/";
+const baseAPIURL = "http://localhost:3300/";
 
-const giveawayContractAddress = "0x9Fc3168ee0Cf90aaBF485BF24c337da9922bB4a3";
+const giveawayContractAddress = "0x6A2fE51B2793879FC3d6C4bD54ec6337Eb7de2B4";
 const giveawayABI = [
     {
 		"inputs": [],
@@ -28,7 +28,7 @@ const giveawayABI = [
 	}
 ];
 
-const airdropContractAddress = "0xe18A8E1072e932841573d5716b69F9121BE8E69C";
+const airdropContractAddress = "0xb2C3FA7E08E30820Fd8D02BE18DFAE9714f8401a";
 const airdropABI = [
     {
 		"inputs": [
@@ -185,9 +185,10 @@ export const createGiveaway = async (createBody) => {
 			signer,
 		);
 
-		const _giveawayAmount = ethers.parseEther(giveawayAmount);
+		// const _giveawayAmount = ethers.parseEther(giveawayAmount);
+		const _giveawayAmount = ethers.parseEther("0.0001");
 
-		const TX = await contract.createGiveaway({ value: _giveawayAmount });
+		const TX = await contract.creategiveaway({ value: _giveawayAmount });
 		const receipt = await TX.wait();
 		console.log("created", receipt);
 
@@ -263,8 +264,35 @@ export const createAirdrop = async (createBody) => {
 	}
 };
 
-// participate
-export const medalAction = async (id, claimed, isCreator, isParticipant) => {
+export const giveawayAction = async (id, claimed, isCreator) => {
+	try {
+		await connectWallet();
+		const address = await getUserAddress();
+
+		const contract = new ethers.Contract(
+			giveawayContractAddress,
+			giveawayABI,
+			signer,
+		);
+
+		if (claimed) {
+			console.log(claimed);
+		}
+
+		if (isCreator) {
+			console.log(id);
+		}
+
+		const TX = await contract.claimGiveaway(id);
+		const receipt = await TX.wait();
+		console.log("claimed", receipt);
+
+	} catch (error) {
+		console.log(error);
+	}
+};
+
+export const airdropAction = async (id, claimed, isCreator) => {
 	try {
 		await connectWallet();
 		const address = await getUserAddress();
@@ -274,52 +302,28 @@ export const medalAction = async (id, claimed, isCreator, isParticipant) => {
 		}
 
 		if (isCreator) {
-			await mintEligible();
-		}
-
-		if (isParticipant) {
-			console.log(isParticipant);
-		} else {
-			const endPoint = `participate/${id}`;
 			console.log(id);
-	
-			const participateEndpoint = baseAPIURL + endPoint;
-	
-			const response = await fetch(participateEndpoint, {
-				method: "POST",
-				headers: {
-					"Content-Type": "application/json",
-				},
-				body: JSON.stringify({ address: address }),
-			});
-	
-			if (!response.ok) {
-				throw new Error("Server Error");
-			}
-	
-			const data = await response.json();
-	
-			console.log("registered Successfully", data.response);
-	
 		}
-
 	} catch (error) {
 		console.log(error);
 	}
 };
 
-export const getMessage = (claimed, isCreator, isParticipant) => {
+export const getMessage = (claimed, isCreator) => {
 	if (claimed) {
-		return "Minted";
+		return "claimed";
 	}
 
 	if (isCreator) {
-		return "Mint to Eligible";
+		return "created";
 	}
 
-	if (isParticipant) {
-		return "Particpated";
-	} else {
-		return "Participate";
-	}
+	return "claim";
+}
+
+export const getTokenDetails = async (tokenAddress) => {
+	const tokenName = hshshhs;
+	const tokenSymbol = hdhhdh;
+	const tokenDetails = { tokenName: tokenName, tokenSymbol: tokenSymbol } 
+	return (tokenDetails);
 }

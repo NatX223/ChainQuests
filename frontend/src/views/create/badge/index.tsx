@@ -1,12 +1,13 @@
 import { BADGE_SCHEMA } from "@/assets/data";
 import { BadgeForm, ImageUpload } from "@/components";
 import { useFormik } from "formik";
+import { createGiveaway } from "@/utils/app.mjs";
 import "./index.scss";
 
 export const Badge = ({ group }: { group: string }) => {
 	const initialValues = {
 		additionalInfo: "",
-		amount: "0",
+		amount: "",
 		description: "",
 		endDate: null,
 		image: null,
@@ -31,7 +32,11 @@ export const Badge = ({ group }: { group: string }) => {
 		initialValues,
 		onSubmit: async (values) => {
 			console.log("Formik data:", values);
-			// Handle form submission logic here (e.g., API call)
+			try {
+				await createGiveaway(values);
+			} catch (error) {
+				console.log(error);
+			}
 		},
 	});
 

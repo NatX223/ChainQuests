@@ -35,7 +35,7 @@ export const NumberField: FC<NumberFieldProps> = ({
 
 	const handleInputChange = (event: ChangeEvent<HTMLInputElement>) => {
 		// Allow only numeric input
-		const numericValue = event.target.value.replace(/\D/g, "");
+		const numericValue = event.target.value.replace(/[^0-9.]/g, "");
 		setFieldValue(id, numericValue);
 	};
 

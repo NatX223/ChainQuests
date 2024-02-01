@@ -14,23 +14,14 @@ export const ExploreTabs: FC<tabProps> = ({
 					className={`${tabIsActive("board")} ${group}__tabs-button`}
 					onClick={() => onTabChange("board")}
 				>
-					<span>Board</span>
+					<span>Giveaways</span>
 				</button>
 
 				<button
 					className={`${tabIsActive("medals")} ${group}__tabs-button`}
 					onClick={() => onTabChange("medals")}
 				>
-					<span>Medals</span>
-				</button>
-
-				<button
-					className={`${tabIsActive(
-						"profiles",
-					)} ${group}__tabs-button`}
-					onClick={() => onTabChange("profiles")}
-				>
-					<span>Proflies</span>
+					<span>Airdrops</span>
 				</button>
 			</div>
 		</section>

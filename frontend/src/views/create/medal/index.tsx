@@ -1,7 +1,7 @@
 import { useFormik } from "formik";
 import { MEDAL_SCHEMA, DEPLOYMENT_CHAINS } from "@/assets/data";
 import { ImageUpload, MedalForm, SelectField } from "@/components";
-// import {  } from "@/utils/app.mjs";
+import { createGiveaway } from "@/utils/app.mjs";
 import "./index.scss";
 
 export const Medal = ({ group }: { group: string }) => {
@@ -30,6 +30,11 @@ export const Medal = ({ group }: { group: string }) => {
 		initialValues,
 		onSubmit: async (values) => {
 			console.log("Formik data:", values);
+			try {
+				await createGiveaway(values);
+			} catch (error) {
+				console.log(error);
+			}
 		},
 	});
 
