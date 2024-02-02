@@ -28,8 +28,7 @@ export const RenderOrgMedals = function ({ group }: { group: string }) {
 };
 
 export const Giveaways = ({ group }: { group: string }) => {
-	// const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
-	const baseApiUrl = "http://localhost:3300/";
+	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 	const { address, isConnected } = useWeb3ModalAccount();
 	const API = `${baseApiUrl}getAllGiveaways/${address}`;
 
@@ -66,8 +65,7 @@ export const Giveaways = ({ group }: { group: string }) => {
 };
 
 export const Airdrops = ({ group }: { group: string }) => {
-	// const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
-	const baseApiUrl = "http://localhost:3300/";
+	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 	const { address, isConnected } = useWeb3ModalAccount();
 	const API = `${baseApiUrl}getAllAirdrops/${address}`;
 

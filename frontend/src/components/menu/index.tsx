@@ -15,24 +15,11 @@ export const Menu = () => {
 	const { address, isConnected } = useWeb3ModalAccount();
 	const { status: isMenuActive, toggleStatus: setIsMenuActive } = useToggle();
 
-	const baseAPIURL = process.env.NEXT_PUBLIC_API_URL;
-
 	useEffect(() => {
 		// Toggle background vertical scroll when menu is active
 		const scroll = isMenuActive ? "hidden" : "visible";
 		document.body.style.overflowY = scroll;
 	}, [isMenuActive]);
-
-	useEffect(() => {
-		isConnected &&
-			(async () => {
-				const { exists } = (
-					await axios.get(`${baseAPIURL}checkUser/${address}`)
-				).data;
-
-				!exists && router.replace("/profile/edit");
-			})();
-	}, [isConnected]);
 
 	return (
 		<section className="menu">
