@@ -47,10 +47,22 @@ allocation of their share in the giveaway or airdrop.
 
 -   ### **Solidity smart contracts**
 
-    The contracts can be found [here](https://github.com/Metastuc/wagmiclub-2.0-/tree/main/contracts)
+    The  smart contracts can be found [here](https://github.com/NatX223/ChainQuests/tree/main/Smart-Contracts/contracts)
 
-    -   **Badges** This is soul bound token (SBT) implemented as an VRC725 contract for issuing badges to users, each badge is represented by a new tokenId. The Badge contract can be found [here](https://github.com/Metastuc/wagmiclub-2.0-/blob/main/contracts/contracts/Badge.sol). The deployed address of the Badge contract on Viction testnet is 0x9Fc3168ee0Cf90aaBF485BF24c337da9922bB4a3
-    -   **Medals** The medals contract implements the ERC1155 contract standard and is also a soul bound token (SBT), this contract is used to award medal tokens to eligible participants using the batchMint function which only the creator of the medal can mint and the input is gotten from the backend to make sure only the eligible candidates get the token minted to them. The Medal contract can be found [here](https://github.com/Metastuc/wagmiclub-2.0-/blob/main/contracts/contracts/Medal.sol). The deployed address of the Badge contract on Viction testnet is 0xe18A8E1072e932841573d5716b69F9121BE8E69C
+    -   **Giveaway Contract** The giveaway contract serves as the central hub for managing all giveaways created on the platform. It 
+    utilizes the OpenZeppelin Counters contract and defines various structs to monitor giveaway balances. Users can leverage the 
+    contract's functionality to create giveaways with ETH by invoking the createGiveaway function. This establishes a systematic and 
+    secure approach to organizing and tracking giveaways within the platform. The Giveaway contract code can be found [here](https://
+    github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/Giveaway.sol). The deployed address of the Giveaway contract 
+    on LightLink Pegasus testnet is 0x9Fc3168ee0Cf90aaBF485BF24c337da9922bB4a3
+    -   **Airdrop Contract** The airdrop contract takes charge of creating, organizing, and facilitating the claiming process for 
+    airdrops on the platform. It streamlines the airdrop launch process for token creators by featuring the createAirdrop function. 
+    This function prompts creators to send and lock the designated amount of tokens in the airdrop contract. Leveraging OpenZeppelin 
+    Counters contract and the IERC20 interface, the contract ensures a systematic and efficient management of airdrop activities on 
+    the platform. The Airdrop contract can be found [here](https://github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/
+    Airdrop.sol). The deployed address of the Airdrop contract on LightLink Pegasus testnet is 
+    0xe18A8E1072e932841573d5716b69F9121BE8E69C
+
     -   **How to run** clone the repo, enter the contracts folder and download the npm packages by running:
     ```bash
     npm install
@@ -59,14 +71,13 @@ allocation of their share in the giveaway or airdrop.
     ```
     configure the hardhat.config file(default set to mumbai) then deploy to any chain of choice of using the commands
     ```bash
-    npx hardhat run --network <your-network> scripts/deployMedal.js
-    npx hardhat run --network <your-network> scripts/deployBadge.js
+    npx hardhat run --network <your-network> scripts/deployGiveaway.js
+    npx hardhat run --network <your-network> scripts/deployAirdrop.js
     ```
+
+
 
 -   ### **Backend**
 
     -   <b style="color: orange">Node.js was the framework used for the backend</b>, we used the backend to call the Covalent Unified API and to feed in the eligible addresses for medals to be minted.The backend was also used to handle storage of user information along with the firestore database. Public endpoints can be accessed [here](wagmi-backend.up.railway.app). The code for the backend can be found [here] (https://github.com/Metastuc/wagmiclub-2.0-/blob/main/server/index.js)
     
--   ### **Covalent-API**
-
-    -   The Covalent API was used to fetch users onchain metrics like number of NFTs an account has and how much tokens an address has been transferred to an account example usage can be found[here](https://github.com/Metastuc/wagmiclub-2.0-/blob/main/server/index.js) and the endpoint that most utilized this is the getEligible and getEligibleArray endpoints.
