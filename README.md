@@ -6,6 +6,8 @@
 -   [Solution](#Solution)
 -   [How it works](#How-it-works)
 -   [Technologies Used](#technologies-used)
+    -   [Smart Contract](#Solidity-smart-contracts)
+    -   [LightLink Testnet](#LightLink-Testnet)
     -   [Smart Contract](#solidity-smart-contracts)
     -   [Backend](#backend)
     -   [Covalent API](#Covalent-API)
@@ -59,8 +61,7 @@ allocation of their share in the giveaway or airdrop.
     airdrops on the platform. It streamlines the airdrop launch process for token creators by featuring the createAirdrop function. 
     This function prompts creators to send and lock the designated amount of tokens in the airdrop contract. Leveraging OpenZeppelin 
     Counters contract and the IERC20 interface, the contract ensures a systematic and efficient management of airdrop activities on 
-    the platform. The Airdrop contract can be found [here](https://github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/
-    Airdrop.sol). The deployed address of the Airdrop contract on LightLink Pegasus testnet is 
+    the platform. The Airdrop contract can be found [here](https://github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/Airdrop.sol). The deployed address of the Airdrop contract on LightLink Pegasus testnet is 
     0xe18A8E1072e932841573d5716b69F9121BE8E69C
 
     -   **How to run** clone the repo, enter the contracts folder and download the npm packages by running:
@@ -74,8 +75,6 @@ allocation of their share in the giveaway or airdrop.
     npx hardhat run --network <your-network> scripts/deployGiveaway.js
     npx hardhat run --network <your-network> scripts/deployAirdrop.js
     ```
-
-
 
 -   ### **Backend**
 
