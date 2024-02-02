@@ -60,8 +60,7 @@ allocation of their share in the giveaway or airdrop.
     -   **Airdrop Contract** The airdrop contract takes charge of creating, organizing, and facilitating the claiming process for 
     airdrops on the platform. It streamlines the airdrop launch process for token creators by featuring the createAirdrop function. 
     This function prompts creators to send and lock the designated amount of tokens in the airdrop contract. Leveraging OpenZeppelin 
-    Counters contract and the IERC20 interface, the contract ensures a systematic and efficient management of airdrop activities on 
-    the platform. The Airdrop contract can be found [here](https://github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/Airdrop.sol). The deployed address of the Airdrop contract on LightLink Pegasus testnet is 
+    Counters contract and the IERC20 interface, the contract ensures a systematic and efficient management of airdrop activities on the platform. The Airdrop contract can be found [here](https://github.com/NatX223/ChainQuests/blob/main/Smart-Contracts/contracts/Airdrop.sol). The deployed address of the Airdrop contract on LightLink Pegasus testnet is 
     0xe18A8E1072e932841573d5716b69F9121BE8E69C
 
     -   **How to run** clone the repo, enter the contracts folder and download the npm packages by running:
