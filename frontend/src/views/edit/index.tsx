@@ -2,7 +2,6 @@
 
 import { EDIT_SCHEMA } from "@/assets/data";
 import { Details, Socials } from "@/components";
-import { signUp } from "@/utils/app.mjs";
 import { useWeb3ModalAccount } from "@web3modal/ethers/react";
 import { useFormik } from "formik";
 import { useEffect } from "react";
@@ -50,7 +49,6 @@ export const FormField = ({ activeTab }: { activeTab: string }) => {
 		initialValues, // Initial form values
 		onSubmit: async (values) => {
 			try {
-				await signUp(values, address);
 				console.log(values);
 				
 			} catch (error) {
