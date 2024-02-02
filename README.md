@@ -8,9 +8,8 @@
 -   [Technologies Used](#technologies-used)
     -   [Smart Contract](#Solidity-smart-contracts)
     -   [LightLink Testnet](#LightLink-Testnet)
-    -   [Smart Contract](#solidity-smart-contracts)
+    -   [API3](#API3)
     -   [Backend](#backend)
-    -   [Covalent API](#Covalent-API)
 #
 
 > ## Problem-statement
@@ -21,7 +20,6 @@ giveaways and airdrops. The need is for a solution that streamlines giveaway org
 reliable platform for users to find credible opportunities.
 
 > ## Solution
-
 
 Solution: Introducing a platform that empowers both protocols and individuals to effortlessly organize giveaways and initiate 
 airdrops. Through this solution, rewards are distributed randomly among participants, ensuring a fair and engaging experience for all 
@@ -75,7 +73,18 @@ allocation of their share in the giveaway or airdrop.
     npx hardhat run --network <your-network> scripts/deployAirdrop.js
     ```
 
+-   ### **LightLink-Testnet**
+
+    - The smart contracts were deployed on the LightLink pegasus testnet and enterprise mode was also used to abstract gas fees for both organizers and users
+
+-   ### **API3**
+
+    - API3 QRNG was used to introduce randomness to the process of claiming both Airdrops and Giveaways by generating single uint256 
+    numbers. The numbers generated were then trimmed down to numbers between 10 and 100 (representing 1% to 10%) and used to 
+    determine the amount to be claimed by a user.
+
 -   ### **Backend**
 
-    -   <b style="color: orange">Node.js was the framework used for the backend</b>, we used the backend to call the Covalent Unified API and to feed in the eligible addresses for medals to be minted.The backend was also used to handle storage of user information along with the firestore database. Public endpoints can be accessed [here](wagmi-backend.up.railway.app). The code for the backend can be found [here] (https://github.com/Metastuc/wagmiclub-2.0-/blob/main/server/index.js)
+    -   <b style="color: orange">Node.js was the framework used for the backend</b>, I used the backend to handle the storage and 
+    retrieval of Giveaway and Airdrop details on a database(Firestore DB). The backend code can be found [here](https://github.com/NatX223/ChainQuests/tree/main/Backend)
     
