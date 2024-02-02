@@ -2,7 +2,7 @@ import { ethers } from "ethers";
 var provider;
 var signer;
 
-const baseAPIURL = "http://localhost:3300/";
+const baseAPIURL = "https://chainquests-api-production.up.railway.app/";
 
 const giveawayContractAddress = "0x6A2fE51B2793879FC3d6C4bD54ec6337Eb7de2B4";
 const giveawayABI = [
