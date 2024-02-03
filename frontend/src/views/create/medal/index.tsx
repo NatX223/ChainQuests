@@ -10,7 +10,6 @@ export const Medal = ({ group }: { group: string }) => {
 		title: "",
 		address: "",
 		amount: "0",
-		deployChain: "Pegasus",
 		additionalInfo: "",
 		endDate: null,
 		startDate: new Date(),
@@ -45,19 +44,6 @@ export const Medal = ({ group }: { group: string }) => {
 				onSubmit={handleSubmit}
 				className={`${group}__form`}
 			>
-				<SelectField
-					id="deployChain"
-					group={`${group}__chain`}
-					label="chain"
-					options={DEPLOYMENT_CHAINS}
-					edit={false}
-					onChange={handleChange}
-					setFieldValue={setFieldValue}
-					error={errors.deployChain}
-					touched={touched.deployChain}
-					selectedValue="Pegasus"
-				/>
-
 				{/* File Upload component */}
 				<ImageUpload
 					group={group}
