@@ -6,11 +6,11 @@ export const Hero = ({ group }: { group: string }) => {
 		<section className={`${group}__hero`}>
 			<div className={`${group}__hero-wrapper`}>
 				{/* Main heading for the hero section */}
-				<h1>The standard for fair reward distribution</h1>
+				<h1>The standard for randomized distribution</h1>
 
 				{/* Description text with a highlighted word */}
 				<p>
-					Chain<span>Quests</span> is designed specifically for engaging with enterprise users and rewarding their interactions.
+					Chain<span>Quests</span> is your Gateway to Fair and Transparent distribution.
 				</p>
 
 				<figure>
