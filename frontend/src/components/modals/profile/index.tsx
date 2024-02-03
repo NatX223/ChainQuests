@@ -106,8 +106,8 @@ const Profile = ({ onClose }: { onClose: () => void }) => {
 						/>
 					</span>
 					<div className={`${group}__displayNames`}>
-						<span>Sabinus</span>
-						<span>Investor</span>
+						<span>User</span>
+						<span>chainQuest</span>
 					</div>
 				</div>
 
