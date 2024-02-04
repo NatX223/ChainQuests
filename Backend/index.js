@@ -140,9 +140,8 @@ app.get("/getAllGiveaways/:address", async (req, res) => {
       const allgiveaways = await giveaways.get();
       const giveawayArray = [];
       const giveawaysCount = allgiveaways.size;
-      const count = giveawaysCount + 1;
 
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < giveawaysCount; i++) {
         const giveaway = await giveaways.doc(`${i}`).get();
         const title = giveaway.data().title;
         const description = giveaway.data().description;
@@ -208,9 +207,8 @@ app.get("/getAllAirdrops/:address", async (req, res) => {
       const allairdrops = await airdrops.get();
       const airdropArray = [];
       const airdropsCount = allairdrops.size;
-      const count = airdropsCount + 1;
 
-      for (let i = 0; i < count; i++) {
+      for (let i = 0; i < airdropsCount; i++) {
         const airdrop = await airdrops.doc(`${i}`).get();
         const title = airdrop.data().title;
         const description = airdrop.data().description;

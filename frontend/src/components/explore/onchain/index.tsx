@@ -30,6 +30,8 @@ export const RenderOrgMedals = function ({ group }: { group: string }) {
 export const Giveaways = ({ group }: { group: string }) => {
 	const baseApiUrl = process.env.NEXT_PUBLIC_API_URL;
 	const { address, isConnected } = useWeb3ModalAccount();
+	console.log(address);
+	
 	const API = `${baseApiUrl}getAllGiveaways/${address}`;
 
 	const { data, loading, error } = useFetch({ url: API });
