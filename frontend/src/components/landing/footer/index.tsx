@@ -13,19 +13,13 @@ import "./index.scss";
 export const Footer = ({ group }: { group: string }) => {
 	const texts = [
 		`
-    Wagmiclub is the update over traditional 
-    networking means, with our onchain validation
-    system.
+		Innovative Platform: Revolutionizing giveaways and airdrops with a unique and user-friendly platform.
     `,
 		`
-    Professional networking should be more social,
-    and transparent! showcase your skillset and 
-    credibility, earn the recognition you deserve. 
+		Fair Distribution: Ensuring fairness through random reward allocation for an engaging experience. 
     `,
 		`
-    Discover top ranking professionals,
-    recruiters can easily find the best talents
-    based on their impressive badges & medals
+
     `,
 	];
 
@@ -152,8 +146,7 @@ export const Footer = ({ group }: { group: string }) => {
 				<div>
 					<p>
 						we are focused on building a more trusted and
-						transparent networking system for professionals &
-						recruiters
+						transparent platform creating, curating and claiming rewards.
 					</p>
 					<button>
 						<span>Get Started</span>
